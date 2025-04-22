@@ -28,8 +28,18 @@ const nextConfig = {
   experimental: {
     // Desactivar prerenderizado estático para evitar problemas con autenticación
     appDir: true,
-    esmExternals: 'loose'
-  }
+    esmExternals: 'loose',
+    // Desactivar completamente la generación estática
+    disableStaticGeneration: true
+  },
+  
+  // Excluir páginas específicas del prerenderizado
+  excludePages: [
+    '/_not-found',
+    '/admin/**',
+    '/dashboard',
+    '/reports',
+    '/cronometro',
+    '/registro-manual'
+  ]
 }
-
-module.exports = nextConfig

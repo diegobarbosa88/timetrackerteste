@@ -10,6 +10,8 @@
   NEXT_TELEMETRY_DISABLED = "1"
   # Desactivar generación estática para evitar problemas con autenticación
   NEXT_DISABLE_STATIC_GENERATION = "true"
+  NEXT_PUBLIC_RUNTIME_ENV = "client"
+  NEXT_STATIC_EXPORT = "true"
 
 [build.processing]
   skip_processing = true
