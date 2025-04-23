@@ -3,10 +3,24 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+// Definir interfaz para el tipo de empleado
+interface EmployeeType {
+  id: string;
+  name: string;
+  email: string;
+  department: string;
+  position: string;
+  startDate?: string;
+  status: string;
+  password?: string;
+  active?: boolean;
+}
+
 // Componente para la gestión de empleados
 function AdminEmployeesPage() {
   const router = useRouter();
-  const [employees, setEmployees] = useState([]);
+  // Definir el tipo explícito para el estado de empleados
+  const [employees, setEmployees] = useState<EmployeeType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,7 +69,7 @@ function AdminEmployeesPage() {
   }, []);
 
   // Función para obtener empleados de muestra si no hay datos en localStorage
-  const getSampleEmployees = () => {
+  const getSampleEmployees = (): EmployeeType[] => {
     return [
       {
         id: 'EMP001',
@@ -111,7 +125,7 @@ function AdminEmployeesPage() {
   };
 
   // Función para eliminar un empleado
-  const handleDeleteEmployee = (employeeId) => {
+  const handleDeleteEmployee = (employeeId: string) => {
     if (confirm('¿Estás seguro de que deseas eliminar este empleado? Esta acción no se puede deshacer.')) {
       try {
         // Filtrar el empleado a eliminar
