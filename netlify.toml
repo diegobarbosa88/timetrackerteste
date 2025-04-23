@@ -11,7 +11,6 @@
   NEXT_PUBLIC_RUNTIME_ENV = "client"
   NODE_VERSION = "18.17.1"  # Versión específica en lugar de 18.x
 
-
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
