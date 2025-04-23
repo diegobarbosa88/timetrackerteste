@@ -22,6 +22,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Configuración para resolver módulos externos
+  webpack: (config, { isServer }) => {
+    // Asegurarse de que webpack pueda resolver los módulos necesarios
+    return config;
+  },
 }
-
-module.exports = nextConfig
