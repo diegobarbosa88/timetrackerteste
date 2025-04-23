@@ -9,7 +9,8 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_DISABLE_STATIC_GENERATION = "true"
   NEXT_PUBLIC_RUNTIME_ENV = "client"
-  NODE_VERSION = "18.x"
+  NODE_VERSION = "18.17.1"  # Versión específica en lugar de 18.x
+
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
