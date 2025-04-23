@@ -1,28 +1,27 @@
-/** @type {import('next').NextConfig} */
+/**
+ * @type {import('next').NextConfig}
+ */
 const nextConfig = {
-  // Configurar para exportación estática
-  output: 'export',
-  
-  // Desactivar optimización de imágenes (necesario para exportación estática)
-  images: {
-    unoptimized: true,
-  },
-  
-  // Ignorar errores de TypeScript durante la compilación
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  
-  // Ignorar errores de ESLint durante la compilación
+  reactStrictMode: false,
+  swcMinify: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
-  
-  // Desactivar minificación para reducir problemas de compilación
-  swcMinify: false,
-  
-  // Desactivar modo estricto de React para evitar problemas con hooks
-  reactStrictMode: false
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  experimental: {
+    appDir: true,
+  },
+  env: {
+    NEXT_DISABLE_STATIC_GENERATION: true,
+    NEXT_PUBLIC_RUNTIME_ENV: 'client',
+  },
+  // Configuración para evitar errores de prerenderizado
+  staticPageGenerationTimeout: 120,
+  images: {
+    unoptimized: true,
+  },
 }
 
 module.exports = nextConfig

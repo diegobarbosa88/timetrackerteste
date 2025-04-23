@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../lib/auth';
 import ClientAuthWrapper from '../lib/client-auth-wrapper';
 
-// Componente principal con la lógica y UI
+// Componente interno que contiene la lógica y UI de la página principal
 const HomePageContent = () => {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
@@ -120,7 +120,7 @@ const HomePageContent = () => {
   );
 };
 
-// Componente principal envuelto en ClientAuthWrapper para evitar errores de prerenderizado
+// Componente principal que envuelve el contenido con ClientAuthWrapper
 export default function HomePage() {
   return (
     <ClientAuthWrapper>

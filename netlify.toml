@@ -1,25 +1,23 @@
-# Configuración de Netlify para TimeTracker
+# Configuración de Next.js para Netlify
+# Optimizado para evitar errores de prerenderizado con autenticación
 
 [build]
-  command = "npm run netlify-build"
-  publish = "out"
-  
-[build.environment]
-  NODE_VERSION = "18.17.0"
-  NPM_VERSION = "9.6.7"
-  NPM_FLAGS = "--legacy-peer-deps"
-  NEXT_TELEMETRY_DISABLED = "1"
+  command = "npm run build"
+  publish = ".next"
 
-[build.processing]
-  skip_processing = true
+[build.environment]
+  NEXT_TELEMETRY_DISABLED = "1"
+  NEXT_DISABLE_STATIC_GENERATION = "true"
+  NEXT_PUBLIC_RUNTIME_ENV = "client"
+  NODE_VERSION = "18.x"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Redirecciones para SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+  conditions = {Role = ["admin", "owner", "member"]}
