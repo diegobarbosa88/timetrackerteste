@@ -1,34 +1,17 @@
 # Configuración de Netlify para TimeTracker
 
 [build]
-  command = "npm run build"
+  command = "npm run netlify-build"
   publish = "out"
   
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "18.17.0"
+  NPM_VERSION = "9.6.7"
   NPM_FLAGS = "--legacy-peer-deps"
   NEXT_TELEMETRY_DISABLED = "1"
-  # Desactivar generación estática para evitar problemas con autenticación
-  NEXT_DISABLE_STATIC_GENERATION = "true"
-  NEXT_PUBLIC_RUNTIME_ENV = "client"
-  NEXT_STATIC_EXPORT = "true"
 
 [build.processing]
   skip_processing = true
-
-[build.processing.css]
-  bundle = false
-  minify = false
-
-[build.processing.js]
-  bundle = false
-  minify = false
-
-[build.processing.html]
-  pretty_urls = true
-
-[build.processing.images]
-  compress = false
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

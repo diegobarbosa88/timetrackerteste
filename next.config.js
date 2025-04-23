@@ -22,24 +22,7 @@ const nextConfig = {
   swcMinify: false,
   
   // Desactivar modo estricto de React para evitar problemas con hooks
-  reactStrictMode: false,
-  
-  // Configuración experimental para mejorar compatibilidad
-  experimental: {
-    // Desactivar prerenderizado estático para evitar problemas con autenticación
-    appDir: true,
-    esmExternals: 'loose',
-    // Desactivar completamente la generación estática
-    disableStaticGeneration: true
-  },
-  
-  // Excluir páginas específicas del prerenderizado
-  excludePages: [
-    '/_not-found',
-    '/admin/**',
-    '/dashboard',
-    '/reports',
-    '/cronometro',
-    '/registro-manual'
-  ]
+  reactStrictMode: false
 }
+
+module.exports = nextConfig

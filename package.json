@@ -5,20 +5,22 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "export": "next export",
+    "start": "next start",
+    "netlify-build": "npm run build && echo 'Build completed successfully!'"
   },
   "dependencies": {
     "html2canvas": "^1.4.1",
-    "jspdf": "^3.0.1",
-    "next": "^15.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
+    "jspdf": "^2.5.1",
+    "next": "13.4.19",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@netlify/plugin-nextjs": "^5.10.6",
-    "@types/node": "^18.0.0",
-    "@types/react": "^18.0.0",
-    "typescript": "^5.0.4"
+    "@netlify/plugin-nextjs": "^4.41.3",
+    "@types/node": "18.16.0",
+    "@types/react": "18.2.0",
+    "typescript": "5.0.4"
   }
 }
