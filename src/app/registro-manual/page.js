@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../lib/auth';
-import ClientAuthWrapper from '../../../lib/client-auth-wrapper';
+import { useAuth } from '../../lib/auth';
+import ClientAuthWrapper from '../../lib/client-auth-wrapper';
 
 // Componente interno que contiene la lógica y UI de la página de registro manual
 const RegistroManualPageContent = () => {

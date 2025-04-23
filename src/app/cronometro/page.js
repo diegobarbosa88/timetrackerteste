@@ -1,23 +1,22 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../lib/auth';
-import ClientAuthWrapper from '../../../lib/client-auth-wrapper';
+import { useAuth } from '../../lib/auth';
+import ClientAuthWrapper from '../../lib/client-auth-wrapper';
 
 // Componente interno que contiene la lógica y UI de la página de cronómetro
 const CronometroPageContent = () => {
   const { user, isAuthenticated } = useAuth();
-  const [isRunning, setIsRunning] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [startTime, setStartTime] = useState(null);
-  const [selectedClient, setSelectedClient] = useState('');
   const [clients, setClients] = useState([]);
-  const [timeEntries, setTimeEntries] = useState([]);
+  const [selectedClient, setSelectedClient] = useState('');
+  const [notes, setNotes] = useState('');
+  const [isRunning, setIsRunning] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const [startTime, setStartTime] = useState(null);
   const [currentEntry, setCurrentEntry] = useState(null);
 
-  // Cargar clientes y entradas de tiempo al montar el componente
+  // Cargar clientes al montar el componente
   useEffect(() => {
-    // Cargar clientes
     const loadClients = () => {
       try {
         const storedClients = localStorage.getItem('timetracker_clients');
@@ -31,86 +30,49 @@ const CronometroPageContent = () => {
       }
     };
 
-    // Cargar entradas de tiempo
-    const loadTimeEntries = () => {
-      try {
-        const storedEntries = localStorage.getItem(`timetracker_entries_${user.id}`);
-        if (storedEntries) {
-          setTimeEntries(JSON.parse(storedEntries));
-        }
-      } catch (error) {
-        console.error('Error al cargar entradas de tiempo:', error);
-      }
-    };
-
-    // Verificar si hay una entrada activa
-    const checkActiveEntry = () => {
-      try {
-        const activeEntryStr = localStorage.getItem(`timetracker_active_entry_${user.id}`);
-        if (activeEntryStr) {
-          const activeEntry = JSON.parse(activeEntryStr);
-          setCurrentEntry(activeEntry);
-          setSelectedClient(activeEntry.clientId);
-          setStartTime(new Date(activeEntry.startTime));
-          setIsRunning(true);
-          
-          // Calcular tiempo transcurrido
-          const elapsed = Math.floor((new Date() - new Date(activeEntry.startTime)) / 1000);
-          setElapsedTime(elapsed);
-        }
-      } catch (error) {
-        console.error('Error al verificar entrada activa:', error);
-      }
-    };
-
     loadClients();
-    if (user && user.id) {
-      loadTimeEntries();
-      checkActiveEntry();
-    }
-  }, [user]);
+  }, []);
 
-  // Actualizar el tiempo transcurrido cada segundo
+  // Efecto para el cronómetro
   useEffect(() => {
     let interval = null;
     
     if (isRunning) {
       interval = setInterval(() => {
-        setElapsedTime(Math.floor((new Date() - startTime) / 1000));
+        setSeconds(seconds => seconds + 1);
       }, 1000);
-    } else if (!isRunning && elapsedTime !== 0) {
+    } else if (!isRunning && seconds !== 0) {
       clearInterval(interval);
     }
     
     return () => clearInterval(interval);
-  }, [isRunning, startTime, elapsedTime]);
+  }, [isRunning, seconds]);
 
-  // Formatear segundos a formato HH:MM:SS
-  const formatTime = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+  // Formatear segundos a formato hh:mm:ss
+  const formatTime = (totalSeconds) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
     
     return [
       hours.toString().padStart(2, '0'),
       minutes.toString().padStart(2, '0'),
-      secs.toString().padStart(2, '0')
+      seconds.toString().padStart(2, '0')
     ].join(':');
   };
 
   // Iniciar el cronómetro
   const startTimer = () => {
     if (!selectedClient) {
-      alert('Por favor selecciona un cliente antes de iniciar el cronómetro.');
+      alert('Por favor selecciona un cliente antes de iniciar el cronómetro');
       return;
     }
     
     const now = new Date();
     setStartTime(now);
     setIsRunning(true);
-    setElapsedTime(0);
     
-    // Crear nueva entrada de tiempo
+    // Crear una nueva entrada de tiempo
     const newEntry = {
       id: `entry_${Date.now()}`,
       userId: user.id,
@@ -120,14 +82,11 @@ const CronometroPageContent = () => {
       startTime: now.toISOString(),
       endTime: null,
       duration: 0,
-      notes: '',
-      status: 'active'
+      notes: notes,
+      status: 'running'
     };
     
     setCurrentEntry(newEntry);
-    
-    // Guardar entrada activa en localStorage
-    localStorage.setItem(`timetracker_active_entry_${user.id}`, JSON.stringify(newEntry));
   };
 
   // Detener el cronómetro
@@ -137,53 +96,92 @@ const CronometroPageContent = () => {
     const now = new Date();
     setIsRunning(false);
     
-    // Actualizar entrada actual
-    const duration = Math.floor((now - startTime) / 1000);
-    const updatedEntry = {
-      ...currentEntry,
-      endTime: now.toISOString(),
-      duration: duration,
-      status: 'completed'
-    };
-    
-    // Actualizar lista de entradas
-    const updatedEntries = [...timeEntries, updatedEntry];
-    setTimeEntries(updatedEntries);
-    setCurrentEntry(null);
-    
-    // Guardar en localStorage
-    localStorage.setItem(`timetracker_entries_${user.id}`, JSON.stringify(updatedEntries));
-    localStorage.removeItem(`timetracker_active_entry_${user.id}`);
+    // Actualizar la entrada actual
+    if (currentEntry) {
+      const updatedEntry = {
+        ...currentEntry,
+        endTime: now.toISOString(),
+        duration: seconds,
+        notes: notes,
+        status: 'completed'
+      };
+      
+      // Guardar en localStorage
+      const storedEntries = localStorage.getItem(`timetracker_entries_${user.id}`);
+      let entries = [];
+      
+      if (storedEntries) {
+        entries = JSON.parse(storedEntries);
+      }
+      
+      entries.push(updatedEntry);
+      localStorage.setItem(`timetracker_entries_${user.id}`, JSON.stringify(entries));
+      
+      // Resetear el estado
+      setCurrentEntry(null);
+      setSeconds(0);
+      setNotes('');
+    }
   };
 
-  // Formatear fecha para mostrar
-  const formatDate = (dateString) => {
-    const options = { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+  // Resetear el cronómetro
+  const resetTimer = () => {
+    setIsRunning(false);
+    setSeconds(0);
+    setStartTime(null);
+    setCurrentEntry(null);
   };
 
   return (
     <div className="container mx-auto px-4 py-8 mt-16">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Cronómetro de Tiempo</h1>
         
-        <div className="bg-white shadow-md rounded-lg p-6 mb-8">
+        <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+          <div className="text-center mb-6">
+            <div className="text-6xl font-mono font-bold mb-4">{formatTime(seconds)}</div>
+            
+            <div className="flex justify-center space-x-4">
+              {!isRunning ? (
+                <button
+                  onClick={startTimer}
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded"
+                >
+                  Iniciar
+                </button>
+              ) : (
+                <button
+                  onClick={stopTimer}
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded"
+                >
+                  Detener
+                </button>
+              )}
+              
+              <button
+                onClick={resetTimer}
+                disabled={isRunning}
+                className={`bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded ${
+                  isRunning ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                Reiniciar
+              </button>
+            </div>
+          </div>
+          
           <div className="mb-4">
             <label htmlFor="client" className="block text-gray-700 text-sm font-bold mb-2">
-              Cliente
+              Cliente *
             </label>
             <select
               id="client"
               value={selectedClient}
               onChange={(e) => setSelectedClient(e.target.value)}
               disabled={isRunning}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                isRunning ? 'bg-gray-100' : ''
+              }`}
             >
               <option value="">Selecciona un cliente</option>
               {clients.map(client => (
@@ -194,100 +192,28 @@ const CronometroPageContent = () => {
             </select>
           </div>
           
-          <div className="text-center py-8">
-            <div className="text-6xl font-mono font-bold mb-8">
-              {formatTime(elapsedTime)}
-            </div>
-            
-            <div className="flex justify-center space-x-4">
-              {!isRunning ? (
-                <button
-                  onClick={startTimer}
-                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-full flex items-center"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Iniciar
-                </button>
-              ) : (
-                <button
-                  onClick={stopTimer}
-                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-full flex items-center"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
-                  </svg>
-                  Detener
-                </button>
-              )}
-            </div>
+          <div className="mb-4">
+            <label htmlFor="notes" className="block text-gray-700 text-sm font-bold mb-2">
+              Notas
+            </label>
+            <textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows="3"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="Descripción de las tareas realizadas"
+            ></textarea>
           </div>
         </div>
         
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <h2 className="text-xl font-bold text-gray-900 p-4 bg-gray-50 border-b">
-            Registros Recientes
-          </h2>
-          
-          {timeEntries.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">
-              No hay registros de tiempo. Inicia el cronómetro para crear tu primer registro.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cliente
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Inicio
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Fin
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Duración
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {[...timeEntries].reverse().slice(0, 5).map((entry) => (
-                    <tr key={entry.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {entry.clientName}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(entry.startTime)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {entry.endTime ? formatDate(entry.endTime) : '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatTime(entry.duration)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          
-          {timeEntries.length > 5 && (
-            <div className="p-4 border-t text-center">
-              <a 
-                href="/reports" 
-                className="text-blue-600 hover:text-blue-800"
-              >
-                Ver todos los registros
-              </a>
-            </div>
-          )}
-        </div>
+        {currentEntry && (
+          <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4" role="alert">
+            <p className="font-bold">Registro en curso</p>
+            <p>Cliente: {currentEntry.clientName}</p>
+            <p>Inicio: {new Date(currentEntry.startTime).toLocaleString()}</p>
+          </div>
+        )}
       </div>
     </div>
   );
