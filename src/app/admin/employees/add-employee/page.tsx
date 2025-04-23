@@ -5,12 +5,22 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../../lib/auth';
 import ClientAuthWrapper from '../../../../lib/client-auth-wrapper';
 
+// Definir interfaz para el tipo de empleado
+interface EmployeeType {
+  id: string;
+  name: string;
+  email: string;
+  position: string;
+  department: string;
+  active: boolean;
+}
+
 // Componente interno que contiene la lógica y UI
 const AddEmployeePageContent = () => {
   const { user, isAuthenticated, isAdmin } = useAuth();
   const router = useRouter();
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<EmployeeType>({
     id: `EMP${Date.now().toString().slice(-6)}`,
     name: '',
     email: '',
@@ -65,14 +75,14 @@ const AddEmployeePageContent = () => {
 
       // Obtener empleados actuales
       const storedEmployees = localStorage.getItem('timetracker_employees');
-      let employees = [];
+      let employees: EmployeeType[] = [];
       
       if (storedEmployees) {
         employees = JSON.parse(storedEmployees);
       }
 
       // Verificar si el ID ya existe
-      if (employees.some(emp => emp.id === formData.id)) {
+      if (employees.some((emp: EmployeeType) => emp.id === formData.id)) {
         // Generar un nuevo ID único
         formData.id = `EMP${Date.now().toString().slice(-6)}`;
       }
